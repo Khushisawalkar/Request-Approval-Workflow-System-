@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request & Approval</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+        
+        /* Light & Dark Theme Variables */
+        :root { --bg: #f8f9fa; --card: #ffffff; --text: #212529; --primary: #4f46e5; --success: #10b981; --danger: #ef4444; --border: #e5e7eb; --input-bg: #ffffff; }
+        [data-theme="dark"] { --bg: #111827; --card: #1f2937; --text: #f9fafb; --border: #374151; --input-bg: #374151; }
+        
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 4rem 2rem 2rem; display: flex; gap: 2rem; max-width: 1200px; margin: auto; transition: background 0.3s, color 0.3s; }
+        .card { background: var(--card); padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); flex: 1; transition: background 0.3s; }
+        h2 { margin-top: 0; font-size: 1.25rem; font-weight: 600; border-bottom: 1px solid var(--border); padding-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; }
+        
+        .form-group { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.25rem; }
+        input, textarea { background: var(--input-bg); color: var(--text); padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.95rem; outline: none; transition: border 0.2s, background 0.3s, color 0.3s; }
+        input:focus, textarea:focus { border-color: var(--primary); }
+        
+        button { padding: 0.75rem 1rem; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; transition: transform 0.1s, opacity 0.2s; font-family: inherit; }
+        button:active { transform: scale(0.98); }
+        button:hover { opacity: 0.9; }
+        .btn-primary { background: var(--primary); color: white; width: 100%; }
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.85rem; color: white; margin-right: 0.25rem; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+        th { font-weight: 600; color: #9ca3af; }
+        
+        .badge { padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.85rem; font-weight: 600; }
+        .badge.PENDING { background: #fef3c7; color: #d97706; }
+        .badge.APPROVED { background: #d1fae5; color: var(--success); }
+        .badge.REJECTED { background: #fee2e2; color: var(--danger); }
+        
+        /* Theme Toggle Button */
+        #themeToggle { position: absolute; top: 1rem; right: 2rem; background: var(--card); color: var(--text); border: 1px solid var(--border); padding: 0.5rem 1rem; display: flex; gap: 0.5rem; align-items: center; border-radius: 99px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+    <button id="themeToggle" onclick="toggleTheme()">🌓 Switch Theme</button>
+
+    <div class="card" style="max-width: 350px;">
+        <h2>Submit Request</h2>
+        <form id="reqForm">
+            <div class="form-group"><label>Employee ID</label><input type="number" id="empId" value="1" required></div>
+            <div class="form-group"><label>Title</label><input type="text" id="title" required></div>
+            <div class="form-group"><label>Description</label><textarea id="desc" rows="4" required></textarea></div>
+            <button class="btn-primary" type="submit">Submit Request</button>
+        </form>
+    </div>
+
+    <div class="card" style="flex: 2;">
+        <h2>
+            Manager Dashboard 
+            <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.9rem; font-weight:normal;">
+                Manager ID: <input type="number" id="mgrId" value="2" style="width:60px; padding:0.4rem;">
+                <button class="btn-sm" style="background:#6b7280; margin:0;" onclick="load()">Refresh</button>
+            </div>
+        </h2>
+        <table>
+            <thead><tr><th>ID</th><th>Title</th><th>Status</th><th>Emp</th><th>Action</th></tr></thead>
+            <tbody id="tbody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        // --- Theme Toggle Logic ---
+        const toggleTheme = () => {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        };
+        // Load saved theme on startup
+        if (localStorage.getItem('theme') === 'dark') document.body.setAttribute('data-theme', 'dark');
+
+        // --- Application Logic ---
+        const API = 'http://localhost:8080/api/requests';
+
+        document.getElementById('reqForm').onsubmit = async e => {
+            e.preventDefault();
+            await fetch(API, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ employeeId: empId.value, title: title.value, description: desc.value })
+            });
+            e.target.reset(); empId.value = 1; load();
+        };
+
+        const load = async () => {
+            const res = await fetch(API);
+            const reqs = await res.json();
+            tbody.innerHTML = reqs.map(r => `
+                <tr>
+                    <td>#${r.id}</td>
+                    <td style="font-weight:500">${r.title}</td>
+                    <td><span class="badge ${r.status}">${r.status}</span></td>
+                    <td>${r.employee?.id || '-'}</td>
+                    <td>${r.status === 'PENDING' ? `
+                        <button class="btn-sm" style="background:var(--success)" onclick="act(${r.id},'APPROVE')">Approve</button>
+                        <button class="btn-sm" style="background:var(--danger)" onclick="act(${r.id},'REJECT')">Reject</button>
+                    ` : '-'}</td>
+                </tr>
+            `).join('');
+        };
+
+        const act = async (id, action) => {
+            await fetch(`${API}/${id}/action`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ managerId: mgrId.value, action })
+            });
+            load();
+        };
+
+        load();
+    </script>
+</body>
+</html>
