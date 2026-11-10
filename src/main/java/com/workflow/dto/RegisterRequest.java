@@ -38,3 +38,4 @@ public class RegisterRequest {
 
     private Set<RoleName> roles;
 }
+

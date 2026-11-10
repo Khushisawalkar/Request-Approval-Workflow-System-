@@ -19,3 +19,4 @@ public class PagedResponse<T> {
     private int totalPages;
     private boolean last;
 }
+

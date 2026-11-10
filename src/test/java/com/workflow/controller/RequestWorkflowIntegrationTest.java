@@ -107,3 +107,4 @@ class RequestWorkflowIntegrationTest {
                 .andExpect(jsonPath("$.data.totalRequests", notNullValue()));
     }
 }
+

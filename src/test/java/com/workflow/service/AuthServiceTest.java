@@ -112,3 +112,4 @@ class AuthServiceTest {
         verify(authenticationManager, times(1)).authenticate(any(UsernamePasswordAuthenticationToken.class));
     }
 }
+

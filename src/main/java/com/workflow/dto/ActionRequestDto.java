@@ -14,3 +14,4 @@ public class ActionRequestDto {
     private String action; // "APPROVE" or "REJECT"
     private String comment;
 }
+

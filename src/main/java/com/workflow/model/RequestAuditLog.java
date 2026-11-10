@@ -46,3 +46,4 @@ public class RequestAuditLog {
     @Column(name = "timestamp", updatable = false)
     private LocalDateTime timestamp;
 }
+

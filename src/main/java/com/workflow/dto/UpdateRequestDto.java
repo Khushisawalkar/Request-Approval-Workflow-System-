@@ -23,3 +23,4 @@ public class UpdateRequestDto {
 
     private RequestPriority priority;
 }
+

@@ -11,3 +11,4 @@ public interface RequestAuditLogRepository extends JpaRepository<RequestAuditLog
 
     List<RequestAuditLog> findByRequestIdOrderByTimestampDesc(Long requestId);
 }
+

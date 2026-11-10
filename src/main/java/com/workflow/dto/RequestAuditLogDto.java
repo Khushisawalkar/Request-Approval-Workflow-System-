@@ -23,3 +23,4 @@ public class RequestAuditLogDto {
     private String comment;
     private LocalDateTime timestamp;
 }
+

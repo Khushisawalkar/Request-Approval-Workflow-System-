@@ -76,3 +76,4 @@ class AuthControllerIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 }
+

@@ -20,3 +20,4 @@ public class UserSummaryDto {
     private String department;
     private Set<RoleName> roles;
 }
+

@@ -19,3 +19,4 @@ public class AuthResponse {
     private String fullName;
     private Set<String> roles;
 }
+
