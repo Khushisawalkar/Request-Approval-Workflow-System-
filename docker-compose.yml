@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: workflow-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: requestdb
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_USER: workflow_user
+      MYSQL_PASSWORD: workflow_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  workflow-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: workflow-backend
+    restart: unless-stopped
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:mysql://mysql-db:3306/requestdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: workflow_user
+      DB_PASSWORD: workflow_password
+      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+
+volumes:
+  mysql_data:

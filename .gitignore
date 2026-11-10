@@ -1,8 +1,14 @@
 HELP.md
 target/
-.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+### Local configuration and credentials (Never commit secrets) ###
+application-local.properties
+application-local.yml
+.env
+*.local.properties
 
 ### STS ###
 .apt_generated
